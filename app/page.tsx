@@ -176,7 +176,7 @@ export default function WoffServiceApp() {
               <h2 className="text-8xl font-black italic leading-[0.85] tracking-tighter uppercase">
                 IL MIGLIOR <br/> AMICO DEL <br/> <span className="text-white bg-brown px-4 inline-block">TUO CANE</span>
               </h2>
-              <p className="text-xl font-bold opacity-80 max-w-md">Servizio professionale di Dog Sitting. Gestisci appuntamenti e staff in tempo reale.</p>
+              <p className="text-xl font-bold opacity-80 max-w-md">Servizio professionale di Pet Sitting. Prenota uno dei nostri petsitter!</p>
               
               <div className="flex flex-wrap gap-6 pt-4">
                 <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-brown/5 text-center flex-1 min-w-[150px]">
@@ -185,8 +185,8 @@ export default function WoffServiceApp() {
                   <p className="text-[10px] font-bold opacity-60">30 MINUTI</p>
                 </div>
                 <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-brown/5 text-center flex-1 min-w-[150px]">
-                  <p className="text-[10px] font-black uppercase opacity-40 mb-2">Extra Time</p>
-                  <p className="text-3xl font-black">18€</p>
+                  <p className="text-[10px] font-black uppercase opacity-40 mb-2">Passeggiata</p>
+                  <p className="text-3xl font-black">20€</p>
                   <p className="text-[10px] font-bold opacity-60">60 MINUTI</p>
                 </div>
               </div>
