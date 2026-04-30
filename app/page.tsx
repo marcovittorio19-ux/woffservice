@@ -198,7 +198,7 @@ export default function WoffServiceApp() {
 
             <div className="grid grid-cols-2 gap-4">
                <div className="aspect-square bg-brown/10 rounded-[3rem] flex items-center justify-center p-8 text-center font-black italic uppercase leading-tight">Vittorio<br/><span className="text-[10px] opacity-40">Founder</span></div>
-               <div className="aspect-[3/4] bg-brown/5 rounded-[3rem] mt-12 flex items-center justify-center p-8 text-center font-black italic uppercase">Passione<br/>Cina</div>
+               <div className="aspect-[3/4] bg-brown/5 rounded-[3rem] mt-12 flex items-center justify-center p-8 text-center font-black italic uppercase">Giulio<br/><span className="text-[10px] opacity-40">Staff</span></div>
                <div className="aspect-[3/4] bg-white rounded-[3rem] -mt-12 shadow-xl flex items-center justify-center p-8 text-center font-black italic uppercase">Simone<br/><span className="text-[10px] opacity-40">Staff</span></div>
                <div className="aspect-square bg-brown/20 rounded-[3rem] flex items-center justify-center p-8 text-center font-black italic uppercase leading-tight">Filippo<br/><span className="text-[10px] opacity-40">Staff</span></div>
             </div>
