@@ -191,16 +191,16 @@ export default function WoffServiceApp() {
                 </div>
               </div>
 
-              <button onClick={() => { setCurrentPage('app'); setView('register'); }} className="w-full md:w-auto bg-brown text-white px-12 py-6 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform">
+              <button onClick={() => { setCurrentPage('app'); setView('register'); }} className="w-full md:w-auto bg-white text-brown px-12 py-6 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform">
                 Inizia ora
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-               <div className="aspect-square bg-brown/10 rounded-[3rem] flex items-center justify-center p-8 text-center font-black italic uppercase leading-tight">Vittorio<br/><span className="text-[10px] opacity-40">Founder</span></div>
-               <div className="aspect-[3/4] bg-brown/5 rounded-[3rem] mt-12 flex items-center justify-center p-8 text-center font-black italic uppercase">Giulio<br/><span className="text-[10px] opacity-40">Staff</span></div>
+               <div className="aspect-square bg-white/10 rounded-[3rem] flex items-center justify-center p-8 text-center font-black italic uppercase leading-tight">Vittorio<br/><span className="text-[10px] opacity-40">Founder</span></div>
+               <div className="aspect-[3/4] bg-white/5 rounded-[3rem] mt-12 flex items-center justify-center p-8 text-center font-black italic uppercase">Giulio<br/><span className="text-[10px] opacity-40">Staff</span></div>
                <div className="aspect-[3/4] bg-white rounded-[3rem] -mt-12 shadow-xl flex items-center justify-center p-8 text-center font-black italic uppercase">Simone<br/><span className="text-[10px] opacity-40">Staff</span></div>
-               <div className="aspect-square bg-brown/20 rounded-[3rem] flex items-center justify-center p-8 text-center font-black italic uppercase leading-tight">Filippo<br/><span className="text-[10px] opacity-40">Staff</span></div>
+               <div className="aspect-square bg-white/20 rounded-[3rem] flex items-center justify-center p-8 text-center font-black italic uppercase leading-tight">Filippo<br/><span className="text-[10px] opacity-40">Staff</span></div>
             </div>
           </div>
         </main>
