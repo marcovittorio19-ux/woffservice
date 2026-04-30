@@ -103,25 +103,59 @@ export default function WoffServiceApp() {
     setBookings(data || []);
   };
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    if (view === 'register') {
-      if (password !== confirmPassword) { alert("Le password non coincidono"); setLoading(false); return; }
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) alert(error.message);
-      else if (data.user) {
-        await supabase.from('profiles').upsert([{ id: data.user.id, email, first_name: firstName, last_name: lastName, phone, is_admin: false }]);
-        alert("Account creato! Controlla la tua mail e conferma il tuo account per accedere!");
-        setView('login');
-      }
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert("Credenziali errate");
-      else window.location.reload();
+const handleAuth = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  if (view === 'register') {
+    // 1. Controllo password
+    if (password !== confirmPassword) {
+      alert("Le password non coincidono");
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  };
+
+    // 2. Registrazione su Supabase Auth
+    const { data, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (authError) {
+      alert("Errore registrazione: " + authError.message);
+      setLoading(false);
+      return;
+    }
+
+    // 3. SE l'utente è stato creato, inseriamolo SUBITO nella tabella profiles
+    if (data.user) {
+      const { error: profileError } = await supabase.from('profiles').insert([
+        {
+          id: data.user.id, // Collega l'ID dell'Auth alla tabella profiles
+          email: email,
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone,
+          is_admin: false,
+        },
+      ]);
+
+      if (profileError) {
+        console.error("Errore database profiles:", profileError);
+        alert("Account creato, ma errore nel salvataggio dei dati profilo: " + profileError.message);
+      } else {
+        alert("Registrazione completata! Ora puoi accedere.");
+        setView('login'); // Ti sposta alla schermata di login
+      }
+    }
+  } else {
+    // Logica per il Login
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) alert("Accesso fallito: " + error.message);
+    else window.location.reload();
+  }
+  setLoading(false);
+};
 
   const updateStatus = async (id: string, newStatus: string) => {
     await supabase.from('bookings').update({ status: newStatus }).eq('id', id);
@@ -337,8 +371,6 @@ export default function WoffServiceApp() {
                   </button>
                 </form>
               </div>
-            </div>
-          )}
         </main>
       </div>
       <style jsx>{`
