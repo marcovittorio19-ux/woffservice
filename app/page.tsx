@@ -3,12 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function WoffServiceApp() {
+  // --- STATI ORIGINALI (NON TOCCARE) ---
   const [session, setSession] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [view, setView] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+
+  // Nuova gestione per la navigazione tra Home e App
+  const [currentPage, setCurrentPage] = useState<'home' | 'app'>('home');
 
   // Dati Form
   const [email, setEmail] = useState('');
@@ -34,11 +38,13 @@ export default function WoffServiceApp() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) fetchProfile(session.user.id);
+      if (session) {
+        fetchProfile(session.user.id);
+        setCurrentPage('app'); // Se è già loggato, vai all'app
+      }
     });
   }, []);
 
-  // Utility per gestire i calcoli temporali in minuti
   const timeToMins = (t: string) => {
     const [h, m] = t.split(':').map(Number);
     return h * 60 + m;
@@ -50,54 +56,36 @@ export default function WoffServiceApp() {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
   };
 
-  // CALCOLO INTELLIGENTE: Controlla la disponibilità specifica per lo STAFF selezionato
   useEffect(() => {
     const generateSlots = () => {
       if (!bookingForm.date || !bookingForm.duration || bookingForm.duration <= 0) {
         setAvailableSlots([]);
         return;
       }
-
       const slots = [];
       const startHour = 8; 
       const endHour = 22;  
       const requestedDuration = Number(bookingForm.duration);
 
-      // Scansioniamo la giornata ogni 15 minuti
       for (let h = startHour; h < endHour; h++) {
         for (let m = 0; m < 60; m += 15) { 
           const currentStartMins = h * 60 + m;
           const currentEndMins = currentStartMins + requestedDuration;
           const currentTimeStr = minsToTime(currentStartMins);
-
           if (currentEndMins > endHour * 60) continue;
 
-          // Per ogni slot, contiamo quanti cani ha lo STAFF selezionato in quel lasso di tempo
           const isStaffBusy = bookings.some(b => {
-            // Consideriamo solo prenotazioni dello stesso giorno, dello STESSO STAFF e non annullate/rifiutate
-            if (
-              b.booking_date !== bookingForm.date || 
-              b.staff_name !== bookingForm.staffName || 
-              b.status === 'cancelled' || 
-              b.status === 'rejected'
-            ) return false;
-            
+            if (b.booking_date !== bookingForm.date || b.staff_name !== bookingForm.staffName || b.status === 'cancelled' || b.status === 'rejected') return false;
             const existingStartMins = timeToMins(b.booking_time);
             const existingEndMins = existingStartMins + b.duration_minutes;
-
-            // Verifica sovrapposizione temporale
             const overlaps = (currentStartMins < existingEndMins && currentEndMins > existingStartMins);
-            
-            // Se si sovrappone e il sitter ha già 2 o più cani, lo slot è occupato
             return overlaps && (b.num_dogs >= 2);
           });
-
           if (!isStaffBusy) slots.push(currentTimeStr);
         }
       }
       setAvailableSlots(slots);
     };
-
     generateSlots();
   }, [bookingForm.date, bookingForm.duration, bookingForm.staffName, bookings]);
 
@@ -110,7 +98,6 @@ export default function WoffServiceApp() {
   };
 
   const fetchData = async (userId: string, isAdmin: boolean) => {
-    // Carichiamo TUTTE le prenotazioni per permettere al sistema di calcolare la disponibilità di tutto lo staff
     let query = supabase.from('bookings').select('*').order('booking_date', { ascending: true });
     const { data } = await query;
     setBookings(data || []);
@@ -138,7 +125,7 @@ export default function WoffServiceApp() {
 
   const updateStatus = async (id: string, newStatus: string) => {
     await supabase.from('bookings').update({ status: newStatus }).eq('id', id);
-    fetchData(session.user.id, profile?.is_admin);
+    fetchData(session?.user.id, profile?.is_admin);
   };
 
   const handleBooking = async (e: React.FormEvent) => {
@@ -174,9 +161,58 @@ export default function WoffServiceApp() {
 
   const inputStyle = "w-full p-4 rounded-2xl border-none bg-[#EFEAE4] text-[#4A342E] placeholder:text-[#4A342E]/40 font-bold outline-none transition-all focus:ring-2 focus:ring-brown/10";
 
+  // --- RENDERING DELLA HOME (NUOVA VETRINA) ---
+  if (currentPage === 'home') {
+    return (
+      <div style={{ backgroundColor: colors.cream, color: colors.brown }} className="min-h-screen">
+        <nav className="flex justify-between items-center p-8 max-w-7xl mx-auto">
+          <h1 className="text-3xl font-black italic tracking-tighter">WOFF SERVICE</h1>
+          <button onClick={() => setCurrentPage('app')} className="bg-[#4A342E] text-white px-8 py-3 rounded-full font-bold uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-all">Area Clienti</button>
+        </nav>
+
+        <main className="max-w-7xl mx-auto px-8 py-16">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <h2 className="text-8xl font-black italic leading-[0.85] tracking-tighter uppercase">
+                IL MIGLIOR <br/> AMICO DEL <br/> <span className="text-white bg-brown px-4 inline-block">TUO CANE</span>
+              </h2>
+              <p className="text-xl font-bold opacity-80 max-w-md">Servizio professionale di Dog Sitting. Gestisci appuntamenti e staff in tempo reale.</p>
+              
+              <div className="flex flex-wrap gap-6 pt-4">
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-brown/5 text-center flex-1 min-w-[150px]">
+                  <p className="text-[10px] font-black uppercase opacity-40 mb-2">Passeggiata</p>
+                  <p className="text-3xl font-black">10€</p>
+                  <p className="text-[10px] font-bold opacity-60">30 MINUTI</p>
+                </div>
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-brown/5 text-center flex-1 min-w-[150px]">
+                  <p className="text-[10px] font-black uppercase opacity-40 mb-2">Extra Time</p>
+                  <p className="text-3xl font-black">18€</p>
+                  <p className="text-[10px] font-bold opacity-60">60 MINUTI</p>
+                </div>
+              </div>
+
+              <button onClick={() => { setCurrentPage('app'); setView('register'); }} className="w-full md:w-auto bg-brown text-white px-12 py-6 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform">
+                Inizia ora
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+               <div className="aspect-square bg-brown/10 rounded-[3rem] flex items-center justify-center p-8 text-center font-black italic uppercase leading-tight">Vittorio<br/><span className="text-[10px] opacity-40">Founder</span></div>
+               <div className="aspect-[3/4] bg-brown/5 rounded-[3rem] mt-12 flex items-center justify-center p-8 text-center font-black italic uppercase">Passione<br/>Cina</div>
+               <div className="aspect-[3/4] bg-white rounded-[3rem] -mt-12 shadow-xl flex items-center justify-center p-8 text-center font-black italic uppercase">Simone<br/><span className="text-[10px] opacity-40">Staff</span></div>
+               <div className="aspect-square bg-brown/20 rounded-[3rem] flex items-center justify-center p-8 text-center font-black italic uppercase leading-tight">Filippo<br/><span className="text-[10px] opacity-40">Staff</span></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // --- RENDERING ORIGINALE (LOGIN E APP) ---
   if (!session) {
     return (
-      <div style={{ backgroundColor: colors.cream }} className="min-h-screen flex items-center justify-center p-6">
+      <div style={{ backgroundColor: colors.cream }} className="min-h-screen flex flex-col items-center justify-center p-6">
+        <button onClick={() => setCurrentPage('home')} className="mb-8 font-black uppercase text-[10px] tracking-widest opacity-40">← Torna alla Home</button>
         <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center">
           <h1 className="text-4xl font-black mb-1 tracking-tighter" style={{ color: colors.brown }}>WOFF SERVICE</h1>
           <p className="text-[10px] font-bold uppercase opacity-40 mb-8 tracking-[0.2em]">Pet Sitting Professionali</p>
@@ -205,11 +241,12 @@ export default function WoffServiceApp() {
     );
   }
 
+  // --- RENDERING DASHBOARD ORIGINALE ---
   return (
     <div style={{ backgroundColor: colors.cream, color: colors.brown }} className="min-h-screen p-6 md:p-12">
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-16">
-          <h2 className="text-2xl font-black tracking-tighter uppercase italic">Woff Service</h2>
+          <button onClick={() => setCurrentPage('home')} className="text-2xl font-black tracking-tighter uppercase italic">Woff Service</button>
           <button onClick={() => supabase.auth.signOut().then(() => window.location.reload())} className="px-6 py-2 rounded-full border-2 border-brown font-black text-[10px] uppercase">Logout</button>
         </header>
 
