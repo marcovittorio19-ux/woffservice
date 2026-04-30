@@ -112,7 +112,7 @@ export default function WoffServiceApp() {
       if (error) alert(error.message);
       else if (data.user) {
         await supabase.from('profiles').upsert([{ id: data.user.id, email, first_name: firstName, last_name: lastName, phone, is_admin: false }]);
-        alert("Account creato! Accedi ora.");
+        alert("Account creato! Controlla la tua mail e conferma il tuo account per accedere!");
         setView('login');
       }
     } else {
